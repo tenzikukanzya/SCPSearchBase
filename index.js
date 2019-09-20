@@ -152,7 +152,6 @@ const getPost = (URL)=>{
  * @param  {Number} stop 終了番号
  */
 const createPostJSON = async (start,stop)=>{
-    let enSentence = ""
     const JapanList = await getList(jpData);
     await sleep(3);
     const EnList = await getList(enData);
@@ -171,7 +170,6 @@ const createPostJSON = async (start,stop)=>{
             allowedClasses: {}
         });
 
-        enSentence += contentEn
 
         let postJP = {};
         let postEn = {};
@@ -191,10 +189,5 @@ const createPostJSON = async (start,stop)=>{
     }
 }
 
-const wordListCreate=(enSentence)=>{
-    enWords = new Set(enData.match(/[-\w]+/g))
-    enWordArray = [...enWords]
-}
-
 //最初の引数に開始する番号、2つ目に終了する番号
-//createPostJSON(2,4);
+createPostJSON(71,100);
