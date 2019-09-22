@@ -11,6 +11,7 @@ const listEnBase = "http://www.scp-wiki.net/scp-series"
 const enMax = 5
 const enData = [listEnBase,enMax]
 
+const allowClasses = {"div":["collapsible-block","collapsible-block-folded","collapsible-block-link","collapsible-block-unfolded","collapsible-block-unfolded-link","collapsible-block-content"],a:["collapsible-block-link"]}
 const allowTags = [
     'h3',
     'h4',
@@ -83,7 +84,7 @@ const urlJPBase = (number)=>{
     if(number<999){
         padS = 3
     }
-    return "http://ja.scp-wiki.net/scp-" + number.toString().padStart(padS, "0") + "-jp"
+    return "http://ja.scp-wiki.net/scp-" + number.toString().padStart(padS, "0");
 }
 
 /**
@@ -162,12 +163,12 @@ const createPostJSON = async (start,stop)=>{
         }
         let contentEn = sanitizeHtml(getPost(urlENBase(i)), {
             allowedTags: allowTags,
-            allowedClasses: {}
+            allowedClasses: allowClasses
         });
         await sleep(3);
         let contentJP = sanitizeHtml(getPost(urlJPBase(i)), {
             allowedTags: allowTags,
-            allowedClasses: {}
+            allowedClasses: allowClasses
         });
 
 
@@ -190,4 +191,4 @@ const createPostJSON = async (start,stop)=>{
 }
 
 //最初の引数に開始する番号、2つ目に終了する番号
-createPostJSON(71,100);
+createPostJSON(2,100);

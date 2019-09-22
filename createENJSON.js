@@ -1,6 +1,8 @@
 const fs = require('fs');
 const natural = require('natural');
 const tokenizer = new natural.TreebankWordTokenizer();
+const nounInflector = new natural.NounInflector();
+const verbInflector = new natural.PresentVerbInflector();
 
 const getPostList = ()=>{
     return new Promise((resolve,reject)=>{
@@ -38,9 +40,17 @@ const getEnListBase = ()=>{
 
 const lemmatizeCheck = (word)=>{
     let returnArray=[];
-    let single = natural.PorterStemmer.stem(word);
+    let PorterStemmer = natural.PorterStemmer.stem(word);
+    let single = nounInflector.singularize(word)
+    let verb = verbInflector.pluralize(word)
+    if(word!==PorterStemmer){
+        returnArray.push(PorterStemmer)
+    }
     if(word!==single){
         returnArray.push(single)
+    }
+    if(word!==verb){
+        returnArray.push(verb)
     }
     return returnArray;
 }
@@ -50,6 +60,7 @@ const createENJSON = async ()=>{
     let enSentence = "";
     let enSentenceTmp = "";
     const enListBase = await getEnListBase();
+    const enListWordKey = Object.keys(enListBase)
     let lemArray = [];
     let json = {};
     for(key in list){
@@ -72,6 +83,38 @@ const createENJSON = async ()=>{
     console.log("2 "+preenWordArray.length)
     let enWordArray = Array.from(new Set(preenWordArray))
     console.log("3 "+enWordArray.length)
+    let idiomArray = []
+    for(key in enWordArray){
+        let enWord = enWordArray[key]
+        enWord.replace(/\.$/,"")
+        .replace(/\./g, "\\\\.")
+        .replace(/\*/g, "\\\\*")
+        .replace(/\+/g, "\\\\+")
+        .replace(/\^/g, "\\\\^")
+        .replace(/\|/g, "\\\\|")
+        .replace(/\[/g, "\\\\[")
+        .replace(/\]/g, "\\\\]")
+        .replace(/\(/g, "\\\\(")
+        .replace(/\)/g, "\\\\)")
+        .replace(/\?/g, "\\\\?")
+        .replace(/\$/g, "\\\\$")
+        .replace(/\{/g, "\\\\{")
+        .replace(/\}/g, "\\\\}")
+        if(enWord.length>2){
+            let words = enListWordKey.filter(RegExp.prototype.test, new RegExp(`${enWord}`,"i"));
+            for(index in words){
+                if(words[index]!==enWordArray[key]&&enSentence.indexOf(words[index]) != -1){
+                    //console.log("pick UP "+words[index])
+                    idiomArray.push(words[index])
+                }
+            }
+        }
+    }
+    console.log("idiomArrray="+idiomArray.length)
+    enWordArray = enWordArray.concat(idiomArray)
+    console.log("4 "+enWordArray.length)
+    enWordArray = Array.from(new Set(enWordArray))
+    console.log("5 "+enWordArray.length)
     //console.log(enWordArray)
     for(key in enWordArray){
         if(enListBase[enWordArray[key]]!==undefined){
@@ -84,7 +127,7 @@ const createENJSON = async ()=>{
         if(err!=null){
             console.error(err);
         }
-        console.log("DONE!")
+        console.log("DONE!"+Object.keys(json).length)
     });
 }
 
